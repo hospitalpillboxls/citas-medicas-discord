@@ -257,17 +257,22 @@ exports.handler = async (event) => {
       slots
     });
 
- } catch (error) {
+} catch (error) {
 
-  console.error(
-    "Error en availability.js:",
-    error
-  );
+  console.error("ERROR COMPLETO AVAILABILITY:", error);
 
   return json(500, {
     ok: false,
-    error:
-      error.message ||
-      "Error interno del servidor."
+    error: error.message || "Error interno del servidor.",
+    name: error.name || null,
+    cause: error.cause
+      ? {
+          name: error.cause.name || null,
+          message: error.cause.message || null,
+          code: error.cause.code || null,
+          errno: error.cause.errno || null,
+          hostname: error.cause.hostname || null
+        }
+      : null
   });
 }
