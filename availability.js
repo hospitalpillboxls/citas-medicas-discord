@@ -1,8 +1,18 @@
 const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const SUPABASE_SERVICE_ROLE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+// Horarios por día de la semana.
+// 0 = domingo
+// 1 = lunes
+// 2 = martes
+// 3 = miércoles
+// 4 = jueves
+// 5 = viernes
+// 6 = sábado
 
 const SCHEDULE = {
-  0: [], // Domingo cerrado
+  0: [],
 
   1: [
     "09:00",
@@ -67,122 +77,171 @@ const SCHEDULE = {
     "13:30"
   ],
 
-  6: [] // Sábado cerrado
+  6: []
 };
 
-function response(statusCode, body) {
+
+function json(statusCode, data) {
+
   return {
     statusCode,
+
     headers: {
       "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Headers": "Content-Type",
-      "Access-Control-Allow-Methods": "GET, OPTIONS"
+      "Cache-Control": "no-store"
     },
-    body: JSON.stringify(body)
+
+    body: JSON.stringify(data)
   };
 }
 
-function validDate(date) {
-  return /^\d{4}-\d{2}-\d{2}$/.test(date);
-}
 
-exports.handler = async function (event) {
+exports.handler = async function(event) {
+
   try {
-    if (event.httpMethod === "OPTIONS") {
-      return response(200, { ok: true });
-    }
 
-    if (event.httpMethod !== "GET") {
-      return response(405, {
+    if (!SUPABASE_URL) {
+      return json(500, {
         ok: false,
-        error: "Método no permitido"
+        error: "Falta la variable SUPABASE_URL en Netlify."
       });
     }
 
-    if (!SUPABASE_URL || !SUPABASE_KEY) {
-      return response(500, {
+    if (!SUPABASE_SERVICE_ROLE_KEY) {
+      return json(500, {
         ok: false,
-        error: "Faltan las variables SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY"
+        error:
+          "Falta la variable SUPABASE_SERVICE_ROLE_KEY en Netlify."
       });
     }
+
 
     const date = event.queryStringParameters?.date;
 
-    if (!date || !validDate(date)) {
-      return response(400, {
+
+    if (!date) {
+      return json(400, {
         ok: false,
-        error: "Debes indicar una fecha válida: YYYY-MM-DD"
+        error: "Falta el parámetro date."
       });
     }
 
-    // Evita fechas inexistentes como 2026-02-31
-    const testDate = new Date(`${date}T12:00:00`);
 
-    if (
-      Number.isNaN(testDate.getTime()) ||
-      testDate.toISOString().slice(0, 10) !== date
-    ) {
-      return response(400, {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return json(400, {
         ok: false,
-        error: "Fecha inválida"
+        error: "Formato de fecha incorrecto."
       });
     }
 
-    const day = testDate.getDay();
 
-    const availableSlots = SCHEDULE[day] || [];
+    // Crear fecha evitando problemas de zona horaria.
+    const fecha = new Date(`${date}T12:00:00`);
 
-    // Consultamos las reservas existentes de ese día.
+    if (Number.isNaN(fecha.getTime())) {
+      return json(400, {
+        ok: false,
+        error: "Fecha inválida."
+      });
+    }
+
+
+    const diaSemana = fecha.getDay();
+
+    const horarios = SCHEDULE[diaSemana] || [];
+
+
+    if (horarios.length === 0) {
+
+      return json(200, {
+        ok: true,
+        date,
+        slots: []
+      });
+
+    }
+
+
     const url =
       `${SUPABASE_URL}/rest/v1/appointments` +
-      `?select=time` +
-      `&date=eq.${encodeURIComponent(date)}` +
-      `&status=eq.reservado`;
+      `?date=eq.${encodeURIComponent(date)}` +
+      `&select=time,status`;
 
-    const result = await fetch(url, {
+
+    const respuesta = await fetch(url, {
+
       method: "GET",
+
       headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`
+        "apikey": SUPABASE_SERVICE_ROLE_KEY,
+        "Authorization":
+          `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`
       }
+
     });
 
-    if (!result.ok) {
-      const errorText = await result.text();
 
-      console.error("Supabase:", errorText);
+    const texto = await respuesta.text();
 
-      return response(500, {
+
+    if (!respuesta.ok) {
+
+      console.error("Supabase:", texto);
+
+      return json(500, {
         ok: false,
-        error: "No se pudieron consultar las reservas"
+        error: "No se pudieron consultar las citas."
       });
+
     }
 
-    const appointments = await result.json();
 
-    const booked = appointments.map((item) => {
-      return String(item.time).slice(0, 5);
-    });
+    let citas;
 
-    const slots = availableSlots.map((time) => ({
+    try {
+      citas = JSON.parse(texto);
+    } catch {
+      citas = [];
+    }
+
+
+    const ocupadas = new Set(
+      citas.map(cita => String(cita.time).slice(0, 5))
+    );
+
+
+    const slots = horarios.map(time => ({
+
       time,
-      available: !booked.includes(time)
+
+      available: !ocupadas.has(time)
+
     }));
 
-    return response(200, {
+
+    return json(200, {
+
       ok: true,
+
       date,
-      day,
+
       slots
+
     });
+
 
   } catch (error) {
+
     console.error(error);
 
-    return response(500, {
+    return json(500, {
+
       ok: false,
-      error: "Error interno del servidor"
+
+      error: error.message || "Error interno."
+
     });
+
   }
+
 };
