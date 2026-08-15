@@ -338,34 +338,32 @@
 
     try {
 
-      const respuesta = await fetch(
-        `/.netlify/functions/availability?date=${encodeURIComponent(fecha)}`
-      );
+    const respuesta = await fetch(
+  `/.netlify/functions/availability?date=${encodeURIComponent(fecha)}`
+);
 
-      const texto = await respuesta.text();
+console.log("Respuesta availability:", respuesta.status);
 
-      let datos;
+const texto = await respuesta.text();
 
-      try {
-        datos = JSON.parse(texto);
-      } catch (e) {
-        console.error("Respuesta recibida:", texto);
+console.log("Texto recibido:", texto);
 
-        throw new Error(
-          "El servidor no devolvió JSON. Comprueba que la función availability.js esté desplegada en Netlify."
-        );
-      }
+let datos;
 
-      if (!respuesta.ok || !datos.ok) {
-        throw new Error(datos.error || "No se pudieron cargar los horarios.");
-      }
+try {
+  datos = JSON.parse(texto);
+} catch (e) {
+  console.error("Respuesta recibida:", texto);
 
-      cargandoDiv.textContent = "";
+  throw new Error(
+    "El servidor no devolvió JSON. Comprueba que la función availability.js esté desplegada en Netlify."
+  );
+}
 
-      if (!datos.slots || datos.slots.length === 0) {
-        horariosDiv.innerHTML =
-          "<p>No hay horarios disponibles para este día.</p>";
-        return;
+if (!respuesta.ok || !datos.ok) {
+  throw new Error(
+    datos.error || "No se pudieron cargar los horarios."
+  );
       }
 
       datos.slots.forEach(slot => {
