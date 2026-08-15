@@ -2,13 +2,8 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
-  <title>Reservar cita médica</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Citas Médicas</title>
 
   <style>
     * {
@@ -17,17 +12,14 @@
 
     body {
       margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: #f4f7f9;
-      color: #1f2937;
+      font-family: Arial, sans-serif;
+      background: #f3f7f8;
+      color: #17324d;
     }
 
     .container {
       width: min(1000px, 94%);
-      margin: 40px auto;
-    }
-
-    .card {
+      margin: 30px auto;
       background: white;
       border-radius: 18px;
       padding: 30px;
@@ -35,258 +27,176 @@
     }
 
     h1 {
-      text-align: center;
       margin-top: 0;
-      color: #163b5c;
+      color: #0d496b;
     }
 
-    .subtitle {
-      text-align: center;
-      color: #6b7280;
-      margin-bottom: 30px;
+    .subtitulo {
+      color: #64748b;
+      margin-bottom: 25px;
     }
 
-    .calendar-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 15px;
-      margin-bottom: 20px;
-    }
-
-    .calendar-header button {
-      border: 0;
-      background: #163b5c;
-      color: white;
-      width: 42px;
-      height: 42px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 20px;
-    }
-
-    .calendar-header button:disabled {
-      opacity: .4;
-      cursor: not-allowed;
-    }
-
-    #monthTitle {
-      margin: 0;
-      text-align: center;
-      font-size: 22px;
-      text-transform: capitalize;
-    }
-
-    .weekdays,
-    .calendar {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 8px;
-    }
-
-    .weekday {
-      text-align: center;
-      font-weight: bold;
-      font-size: 13px;
-      color: #6b7280;
-      padding: 8px 0;
-    }
-
-    .day {
-      min-height: 70px;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      background: white;
-      cursor: pointer;
-      padding: 10px;
-      font-size: 15px;
-      transition: .15s;
-    }
-
-    .day:hover:not(:disabled) {
-      border-color: #163b5c;
-      transform: translateY(-1px);
-    }
-
-    .day:disabled {
-      cursor: not-allowed;
-      opacity: .35;
-    }
-
-    .day.selected {
-      background: #163b5c;
-      color: white;
-      border-color: #163b5c;
-    }
-
-    .day.today {
-      box-shadow: inset 0 0 0 2px #19a7a8;
-    }
-
-    .day.closed {
-      background: #f3f4f6;
-      color: #9ca3af;
-    }
-
-    .empty {
-      min-height: 70px;
-    }
-
-    .booking-section {
-      margin-top: 30px;
-      border-top: 1px solid #e5e7eb;
-      padding-top: 25px;
-    }
-
-    #selectedDate {
-      font-size: 18px;
-      font-weight: bold;
-      color: #163b5c;
-    }
-
-    .loading {
-      color: #6b7280;
-      padding: 15px 0;
-    }
-
-    .slots {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-      gap: 10px;
-      margin: 18px 0;
-    }
-
-    .slot {
-      border: 1px solid #d1d5db;
-      background: white;
-      padding: 12px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .slot:hover {
-      border-color: #163b5c;
-    }
-
-    .slot.selected {
-      background: #19a7a8;
-      color: white;
-      border-color: #19a7a8;
-    }
-
-    .slot.unavailable {
-      background: #f3f4f6;
-      color: #9ca3af;
-      text-decoration: line-through;
-      cursor: not-allowed;
-    }
-
-    .form {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-      margin-top: 25px;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 7px;
-    }
-
-    .form-group.full {
-      grid-column: 1 / -1;
+    .seccion {
+      margin-bottom: 25px;
     }
 
     label {
+      display: block;
       font-weight: bold;
-      font-size: 14px;
+      margin-bottom: 8px;
     }
 
-    input {
+    input,
+    select {
       width: 100%;
       padding: 13px;
-      border: 1px solid #d1d5db;
+      border: 1px solid #cbd5e1;
       border-radius: 10px;
       font-size: 16px;
+      background: white;
     }
 
-    input:focus {
+    input:focus,
+    select:focus {
       outline: none;
-      border-color: #19a7a8;
+      border-color: #69c7ca;
     }
 
-    #bookButton {
-      grid-column: 1 / -1;
-      border: 0;
-      background: #19a7a8;
-      color: white;
-      padding: 15px;
+    .dias {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .dia {
+      border: 1px solid #cbd5e1;
       border-radius: 10px;
+      padding: 10px 15px;
       cursor: pointer;
+      background: white;
+    }
+
+    .dia:hover {
+      background: #eefafa;
+    }
+
+    .dia.activo {
+      background: #76c9cc;
+      color: white;
+      border-color: #76c9cc;
+    }
+
+    .horarios {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .hora {
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      background: white;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .hora:hover {
+      background: #eefafa;
+    }
+
+    .hora.seleccionada {
+      background: #76c9cc;
+      color: white;
+      border-color: #76c9cc;
+    }
+
+    .hora.ocupada {
+      background: #e5e7eb;
+      color: #9ca3af;
+      cursor: not-allowed;
+      text-decoration: line-through;
+    }
+
+    .formulario {
+      display: none;
+      margin-top: 30px;
+      padding-top: 25px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .fila {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .campo {
+      margin-bottom: 18px;
+    }
+
+    .boton {
+      width: 100%;
+      padding: 15px;
+      border: 0;
+      border-radius: 10px;
+      background: #83ced0;
+      color: white;
       font-size: 17px;
       font-weight: bold;
+      cursor: pointer;
     }
 
-    #bookButton:hover {
-      background: #148b8c;
+    .boton:hover {
+      background: #68bfc2;
     }
 
-    #bookButton:disabled {
-      opacity: .5;
+    .boton:disabled {
+      opacity: .6;
       cursor: not-allowed;
     }
 
-    .message {
-      margin-top: 20px;
+    .mensaje {
+      margin-top: 15px;
       padding: 14px;
       border-radius: 10px;
       display: none;
     }
 
-    .message.success {
+    .mensaje.error {
+      display: block;
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .mensaje.exito {
       display: block;
       background: #dcfce7;
       color: #166534;
     }
 
-    .message.error {
-      display: block;
-      background: #fee2e2;
-      color: #991b1b;
+    .cargando {
+      color: #64748b;
+      margin-top: 15px;
+    }
+
+    .seleccion {
+      padding: 15px;
+      background: #eefafa;
+      border-radius: 10px;
+      margin-top: 20px;
+      display: none;
     }
 
     @media (max-width: 650px) {
       .container {
-        margin: 15px auto;
+        padding: 20px;
       }
 
-      .card {
-        padding: 18px;
-      }
-
-      .day {
-        min-height: 55px;
-        padding: 7px;
-      }
-
-      .form {
+      .fila {
         grid-template-columns: 1fr;
-      }
-
-      .form-group.full,
-      #bookButton {
-        grid-column: auto;
-      }
-
-      .weekdays,
-      .calendar {
-        gap: 4px;
-      }
-
-      .weekday {
-        font-size: 11px;
       }
     }
   </style>
@@ -296,112 +206,68 @@
 
 <div class="container">
 
-  <div class="card">
+  <h1>Reservar cita médica</h1>
 
-    <h1>Reserva tu cita</h1>
+  <div class="subtitulo">
+    Selecciona una fecha y un horario disponible.
+  </div>
 
-    <div class="subtitle">
-      Selecciona un día y después una hora disponible
-    </div>
+  <div class="seccion">
+    <label for="fecha">Fecha</label>
+    <input type="date" id="fecha">
+    <div id="cargando" class="cargando"></div>
+  </div>
 
-    <div class="calendar-header">
+  <div class="seccion">
+    <label>Horarios disponibles</label>
+    <div id="horarios" class="horarios"></div>
+  </div>
 
-      <button id="prevMonth" type="button">
-        ‹
-      </button>
+  <div id="seleccion" class="seleccion"></div>
 
-      <h2 id="monthTitle"></h2>
+  <div id="formulario" class="formulario">
 
-      <button id="nextMonth" type="button">
-        ›
-      </button>
+    <h2>Datos del paciente</h2>
 
-    </div>
+    <div class="fila">
 
-    <div class="weekdays">
-      <div class="weekday">Lun</div>
-      <div class="weekday">Mar</div>
-      <div class="weekday">Mié</div>
-      <div class="weekday">Jue</div>
-      <div class="weekday">Vie</div>
-      <div class="weekday">Sáb</div>
-      <div class="weekday">Dom</div>
-    </div>
-
-    <div id="calendar" class="calendar"></div>
-
-    <div class="booking-section">
-
-      <div id="selectedDate">
-        Selecciona un día
-      </div>
-
-      <div id="loading" class="loading" style="display:none;">
-        Consultando disponibilidad...
-      </div>
-
-      <div id="slots" class="slots"></div>
-
-      <form id="bookingForm" class="form">
-
-        <div class="form-group">
-          <label for="name">
-            Nombre
-          </label>
-
-          <input
-            id="name"
-            name="name"
-            type="text"
-            maxlength="100"
-            required
-            placeholder="Tu nombre"
-          >
-        </div>
-
-        <div class="form-group">
-          <label for="phone">
-            Teléfono
-          </label>
-
-          <input
-            id="phone"
-            name="phone"
-            type="tel"
-            maxlength="30"
-            required
-            placeholder="Tu teléfono"
-          >
-        </div>
-
-        <div class="form-group full">
-          <label for="email">
-            Correo electrónico
-          </label>
-
-          <input
-            id="email"
-            name="email"
-            type="email"
-            maxlength="150"
-            required
-            placeholder="tu@email.com"
-          >
-        </div>
-
-        <button
-          id="bookButton"
-          type="submit"
-          disabled
+      <div class="campo">
+        <label for="nombre">Nombre</label>
+        <input
+          type="text"
+          id="nombre"
+          placeholder="Nombre completo"
+          autocomplete="name"
         >
-          Reservar cita
-        </button>
+      </div>
 
-      </form>
-
-      <div id="message" class="message"></div>
+      <div class="campo">
+        <label for="telefono">Teléfono</label>
+        <input
+          type="tel"
+          id="telefono"
+          placeholder="Teléfono"
+          autocomplete="tel"
+        >
+      </div>
 
     </div>
+
+    <div class="campo">
+      <label for="email">Correo electrónico</label>
+      <input
+        type="email"
+        id="email"
+        placeholder="correo@ejemplo.com"
+        autocomplete="email"
+      >
+    </div>
+
+    <button id="reservar" class="boton">
+      Reservar cita
+    </button>
+
+    <div id="mensaje" class="mensaje"></div>
 
   </div>
 
@@ -409,470 +275,265 @@
 
 <script>
 
-  const calendar = document.getElementById("calendar");
-  const monthTitle = document.getElementById("monthTitle");
-  const prevMonth = document.getElementById("prevMonth");
-  const nextMonth = document.getElementById("nextMonth");
+  const fechaInput = document.getElementById("fecha");
+  const horariosDiv = document.getElementById("horarios");
+  const formulario = document.getElementById("formulario");
+  const seleccionDiv = document.getElementById("seleccion");
+  const mensajeDiv = document.getElementById("mensaje");
+  const cargandoDiv = document.getElementById("cargando");
+  const reservarBtn = document.getElementById("reservar");
 
-  const selectedDateElement =
-    document.getElementById("selectedDate");
+  let fechaSeleccionada = null;
+  let horaSeleccionada = null;
 
-  const loading =
-    document.getElementById("loading");
-
-  const slotsElement =
-    document.getElementById("slots");
-
-  const bookingForm =
-    document.getElementById("bookingForm");
-
-  const bookButton =
-    document.getElementById("bookButton");
-
-  const message =
-    document.getElementById("message");
-
-  let currentMonth = new Date();
-
-  currentMonth.setDate(1);
-
-  let selectedDate = null;
-  let selectedTime = null;
-
-  const today = new Date();
-
-  today.setHours(0, 0, 0, 0);
-
-
-  function formatDate(date) {
-
-    const year = date.getFullYear();
-
-    const month =
-      String(date.getMonth() + 1).padStart(2, "0");
-
-    const day =
-      String(date.getDate()).padStart(2, "0");
-
-    return `${year}-${month}-${day}`;
+  function mostrarError(texto) {
+    mensajeDiv.className = "mensaje error";
+    mensajeDiv.textContent = texto;
+    mensajeDiv.style.display = "block";
   }
 
-
-  function renderCalendar() {
-
-    calendar.innerHTML = "";
-
-    const year = currentMonth.getFullYear();
-
-    const month = currentMonth.getMonth();
-
-    monthTitle.textContent =
-      new Intl.DateTimeFormat("es-ES", {
-        month: "long",
-        year: "numeric"
-      }).format(currentMonth);
-
-
-    const firstDay =
-      new Date(year, month, 1);
-
-    let startingDay =
-      firstDay.getDay();
-
-    // Convertimos domingo=0 a domingo=6
-    // para que lunes sea la primera columna.
-    startingDay =
-      startingDay === 0 ? 6 : startingDay - 1;
-
-
-    for (let i = 0; i < startingDay; i++) {
-
-      const empty =
-        document.createElement("div");
-
-      empty.className = "empty";
-
-      calendar.appendChild(empty);
-    }
-
-
-    const daysInMonth =
-      new Date(year, month + 1, 0).getDate();
-
-
-    for (let day = 1; day <= daysInMonth; day++) {
-
-      const date =
-        new Date(year, month, day);
-
-      date.setHours(0, 0, 0, 0);
-
-
-      const button =
-        document.createElement("button");
-
-      button.type = "button";
-
-      button.className = "day";
-
-      button.textContent = day;
-
-
-      const dateString =
-        formatDate(date);
-
-
-      if (date.getTime() === today.getTime()) {
-        button.classList.add("today");
-      }
-
-
-      // No permitir días anteriores.
-      if (date < today) {
-
-        button.disabled = true;
-
-      }
-
-
-      // Sábado y domingo cerrados.
-      if (
-        date.getDay() === 0 ||
-        date.getDay() === 6
-      ) {
-
-        button.disabled = true;
-
-        button.classList.add("closed");
-
-      }
-
-
-      if (selectedDate === dateString) {
-
-        button.classList.add("selected");
-
-      }
-
-
-      button.addEventListener("click", () => {
-
-        selectDate(dateString);
-
-      });
-
-
-      calendar.appendChild(button);
-
-    }
-
-
-    // No permitir volver a meses anteriores.
-    const currentMonthDate =
-      new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        1
-      );
-
-    prevMonth.disabled =
-      currentMonth <= currentMonthDate;
-
+  function mostrarExito(texto) {
+    mensajeDiv.className = "mensaje exito";
+    mensajeDiv.textContent = texto;
+    mensajeDiv.style.display = "block";
   }
 
+  function limpiarMensaje() {
+    mensajeDiv.style.display = "none";
+    mensajeDiv.textContent = "";
+  }
 
-  async function selectDate(date) {
+  function fechaHoy() {
+    const ahora = new Date();
 
-    selectedDate = date;
+    const y = ahora.getFullYear();
+    const m = String(ahora.getMonth() + 1).padStart(2, "0");
+    const d = String(ahora.getDate()).padStart(2, "0");
 
-    selectedTime = null;
+    return `${y}-${m}-${d}`;
+  }
 
-    bookButton.disabled = true;
+  fechaInput.min = fechaHoy();
 
-    selectedDateElement.textContent =
-      `Fecha seleccionada: ${formatHumanDate(date)}`;
+  async function cargarHorarios() {
 
-    slotsElement.innerHTML = "";
+    const fecha = fechaInput.value;
 
-    loading.style.display = "block";
+    if (!fecha) {
+      horariosDiv.innerHTML = "";
+      formulario.style.display = "none";
+      seleccionDiv.style.display = "none";
+      return;
+    }
 
-    message.className = "message";
+    fechaSeleccionada = fecha;
+    horaSeleccionada = null;
 
-    message.textContent = "";
+    formulario.style.display = "none";
+    seleccionDiv.style.display = "none";
+    limpiarMensaje();
 
-    renderCalendar();
-
+    horariosDiv.innerHTML = "";
+    cargandoDiv.textContent = "Cargando horarios...";
 
     try {
 
-      const response =
-        await fetch(
-          `/.netlify/functions/availability?date=${encodeURIComponent(date)}`
-        );
-
-
-      const data =
-        await response.json();
-
-
-      if (!response.ok || !data.ok) {
-
-        throw new Error(
-          data.error || "No se pudo consultar la disponibilidad"
-        );
-
-      }
-
-
-      renderSlots(data.slots);
-
-    } catch (error) {
-
-      showMessage(
-        error.message,
-        "error"
+      const respuesta = await fetch(
+        `/.netlify/functions/availability?date=${encodeURIComponent(fecha)}`
       );
 
-    } finally {
+      const texto = await respuesta.text();
 
-      loading.style.display = "none";
-
-    }
-
-  }
-
-
-  function renderSlots(slots) {
-
-    slotsElement.innerHTML = "";
-
-
-    if (!slots || slots.length === 0) {
-
-      slotsElement.innerHTML =
-        "<p>No hay horarios disponibles este día.</p>";
-
-      return;
-
-    }
-
-
-    slots.forEach(slot => {
-
-      const button =
-        document.createElement("button");
-
-      button.type = "button";
-
-      button.className = "slot";
-
-      button.textContent = slot.time;
-
-
-      if (!slot.available) {
-
-        button.disabled = true;
-
-        button.classList.add("unavailable");
-
-        button.title = "Hora reservada";
-
-      } else {
-
-        button.addEventListener(
-          "click",
-          () => {
-
-            document
-              .querySelectorAll(".slot")
-              .forEach(item => {
-                item.classList.remove("selected");
-              });
-
-            button.classList.add("selected");
-
-            selectedTime = slot.time;
-
-            bookButton.disabled = false;
-
-          }
-        );
-
-      }
-
-
-      slotsElement.appendChild(button);
-
-    });
-
-  }
-
-
-  function formatHumanDate(dateString) {
-
-    const date =
-      new Date(`${dateString}T12:00:00`);
-
-    return new Intl.DateTimeFormat(
-      "es-ES",
-      {
-        weekday: "long",
-        day: "numeric",
-        month: "long",
-        year: "numeric"
-      }
-    ).format(date);
-
-  }
-
-
-  prevMonth.addEventListener("click", () => {
-
-    currentMonth.setMonth(
-      currentMonth.getMonth() - 1
-    );
-
-    renderCalendar();
-
-  });
-
-
-  nextMonth.addEventListener("click", () => {
-
-    currentMonth.setMonth(
-      currentMonth.getMonth() + 1
-    );
-
-    renderCalendar();
-
-  });
-
-
-  bookingForm.addEventListener(
-    "submit",
-    async event => {
-
-      event.preventDefault();
-
-
-      if (!selectedDate || !selectedTime) {
-
-        showMessage(
-          "Selecciona primero una fecha y una hora.",
-          "error"
-        );
-
-        return;
-
-      }
-
-
-      bookButton.disabled = true;
-
-      bookButton.textContent =
-        "Guardando reserva...";
-
-
-      const formData =
-        new FormData(bookingForm);
-
-
-      const payload = {
-
-        date: selectedDate,
-
-        time: selectedTime,
-
-        name: formData.get("name"),
-
-        email: formData.get("email"),
-
-        phone: formData.get("phone")
-
-      };
-
+      let datos;
 
       try {
+        datos = JSON.parse(texto);
+      } catch (e) {
+        console.error("Respuesta recibida:", texto);
 
-        const response =
-          await fetch(
-            "/.netlify/functions/book",
-            {
-              method: "POST",
+        throw new Error(
+          "El servidor no devolvió JSON. Comprueba que la función availability.js esté desplegada en Netlify."
+        );
+      }
 
-              headers: {
-                "Content-Type":
-                  "application/json"
-              },
+      if (!respuesta.ok || !datos.ok) {
+        throw new Error(datos.error || "No se pudieron cargar los horarios.");
+      }
 
-              body: JSON.stringify(payload)
-            }
-          );
+      cargandoDiv.textContent = "";
 
+      if (!datos.slots || datos.slots.length === 0) {
+        horariosDiv.innerHTML =
+          "<p>No hay horarios disponibles para este día.</p>";
+        return;
+      }
 
-        const data =
-          await response.json();
+      datos.slots.forEach(slot => {
 
+        const boton = document.createElement("button");
 
-        if (!response.ok || !data.ok) {
+        boton.type = "button";
+        boton.className = "hora";
+        boton.textContent = slot.time;
 
-          throw new Error(
-            data.error ||
-            "No se pudo realizar la reserva"
-          );
+        if (slot.available === false) {
+
+          boton.classList.add("ocupada");
+          boton.disabled = true;
+          boton.title = "Horario ocupado";
+
+        } else {
+
+          boton.addEventListener("click", () => {
+
+            document
+              .querySelectorAll(".hora")
+              .forEach(b => b.classList.remove("seleccionada"));
+
+            boton.classList.add("seleccionada");
+
+            horaSeleccionada = slot.time;
+
+            seleccionDiv.innerHTML =
+              `<strong>Fecha:</strong> ${fechaSeleccionada}
+               &nbsp; | &nbsp;
+               <strong>Hora:</strong> ${horaSeleccionada}`;
+
+            seleccionDiv.style.display = "block";
+            formulario.style.display = "block";
+
+            limpiarMensaje();
+
+            formulario.scrollIntoView({
+              behavior: "smooth",
+              block: "start"
+            });
+
+          });
 
         }
 
+        horariosDiv.appendChild(boton);
+      });
 
-        showMessage(
-          "¡Cita reservada correctamente! " +
-          `${formatHumanDate(selectedDate)} a las ${selectedTime}.`,
-          "success"
-        );
+    } catch (error) {
 
+      cargandoDiv.textContent = "";
 
-        bookingForm.reset();
-
-        selectedTime = null;
-
-        bookButton.disabled = true;
-
-
-        // Volvemos a consultar las horas.
-        await selectDate(selectedDate);
-
-
-      } catch (error) {
-
-        showMessage(
-          error.message,
-          "error"
-        );
-
-        bookButton.disabled = false;
-
-      } finally {
-
-        bookButton.textContent =
-          "Reservar cita";
-
-      }
+      mostrarError(error.message);
 
     }
-  );
-
-
-  function showMessage(text, type) {
-
-    message.textContent = text;
-
-    message.className =
-      `message ${type}`;
-
   }
 
+  fechaInput.addEventListener("change", cargarHorarios);
 
-  renderCalendar();
+
+  reservarBtn.addEventListener("click", async () => {
+
+    limpiarMensaje();
+
+    if (!fechaSeleccionada || !horaSeleccionada) {
+      mostrarError("Selecciona primero una fecha y un horario.");
+      return;
+    }
+
+    const nombre =
+      document.getElementById("nombre").value.trim();
+
+    const telefono =
+      document.getElementById("telefono").value.trim();
+
+    const email =
+      document.getElementById("email").value.trim();
+
+    if (!nombre) {
+      mostrarError("Introduce el nombre.");
+      return;
+    }
+
+    if (!telefono) {
+      mostrarError("Introduce el teléfono.");
+      return;
+    }
+
+    if (!email) {
+      mostrarError("Introduce el correo electrónico.");
+      return;
+    }
+
+    if (!email.includes("@")) {
+      mostrarError("Introduce un correo electrónico válido.");
+      return;
+    }
+
+    reservarBtn.disabled = true;
+    reservarBtn.textContent = "Reservando...";
+
+    try {
+
+      const respuesta = await fetch(
+        "/.netlify/functions/book",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json"
+          },
+
+          body: JSON.stringify({
+            date: fechaSeleccionada,
+            time: horaSeleccionada,
+            name: nombre,
+            email: email,
+            phone: telefono
+          })
+        }
+      );
+
+      const texto = await respuesta.text();
+
+      let datos;
+
+      try {
+        datos = JSON.parse(texto);
+      } catch (e) {
+        console.error("Respuesta recibida:", texto);
+
+        throw new Error(
+          "El servidor devolvió una respuesta incorrecta. Comprueba que book.js esté desplegado en Netlify."
+        );
+      }
+
+      if (!respuesta.ok || !datos.ok) {
+        throw new Error(
+          datos.error || "No se pudo reservar la cita."
+        );
+      }
+
+      mostrarExito(
+        `Cita reservada correctamente para el ${fechaSeleccionada} a las ${horaSeleccionada}.`
+      );
+
+      document.getElementById("nombre").value = "";
+      document.getElementById("telefono").value = "";
+      document.getElementById("email").value = "";
+
+      horaSeleccionada = null;
+
+      await cargarHorarios();
+
+    } catch (error) {
+
+      mostrarError(error.message);
+
+    } finally {
+
+      reservarBtn.disabled = false;
+      reservarBtn.textContent = "Reservar cita";
+
+    }
+
+  });
 
 </script>
 
