@@ -2,7 +2,8 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY =
   process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// Horarios disponibles por día
+// =====================================================
+// HORARIOS DISPONIBLES
 // 0 = domingo
 // 1 = lunes
 // 2 = martes
@@ -10,6 +11,7 @@ const SUPABASE_SERVICE_ROLE_KEY =
 // 4 = jueves
 // 5 = viernes
 // 6 = sábado
+// =====================================================
 
 const SCHEDULE = {
   0: [],
@@ -80,9 +82,14 @@ const SCHEDULE = {
   6: []
 };
 
+
+// =====================================================
+// RESPUESTA JSON
+// =====================================================
+
 function json(statusCode, body) {
   return {
-    statusCode,
+    statusCode: statusCode,
 
     headers: {
       "Content-Type": "application/json",
@@ -95,17 +102,29 @@ function json(statusCode, body) {
   };
 }
 
-exports.handler = async (event) => {
+
+// =====================================================
+// FUNCIÓN PRINCIPAL
+// =====================================================
+
+exports.handler = async function (event) {
   try {
 
+    // -------------------------------------------------
     // CORS
+    // -------------------------------------------------
+
     if (event.httpMethod === "OPTIONS") {
       return json(200, {
         ok: true
       });
     }
 
-    // Solo GET
+
+    // -------------------------------------------------
+    // SOLO GET
+    // -------------------------------------------------
+
     if (event.httpMethod !== "GET") {
       return json(405, {
         ok: false,
@@ -113,18 +132,38 @@ exports.handler = async (event) => {
       });
     }
 
-    // Comprobar variables de Netlify
-    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+
+    // -------------------------------------------------
+    // COMPROBAR VARIABLES DE NETLIFY
+    // -------------------------------------------------
+
+    if (!SUPABASE_URL) {
+      console.error("Falta SUPABASE_URL");
+
       return json(500, {
         ok: false,
-        error:
-          "Faltan SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY en Netlify."
+        error: "Falta SUPABASE_URL en Netlify."
       });
     }
 
-    // Obtener fecha
+    if (!SUPABASE_SERVICE_ROLE_KEY) {
+      console.error("Falta SUPABASE_SERVICE_ROLE_KEY");
+
+      return json(500, {
+        ok: false,
+        error: "Falta SUPABASE_SERVICE_ROLE_KEY en Netlify."
+      });
+    }
+
+
+    // -------------------------------------------------
+    // OBTENER FECHA
+    // -------------------------------------------------
+
     const date =
-      event.queryStringParameters?.date;
+      event.queryStringParameters &&
+      event.queryStringParameters.date;
+
 
     if (!date) {
       return json(400, {
@@ -133,7 +172,12 @@ exports.handler = async (event) => {
       });
     }
 
-    // Comprobar formato YYYY-MM-DD
+
+    // -------------------------------------------------
+    // VALIDAR FORMATO
+    // YYYY-MM-DD
+    // -------------------------------------------------
+
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
       return json(400, {
         ok: false,
@@ -141,11 +185,15 @@ exports.handler = async (event) => {
       });
     }
 
-    /*
-      Creamos la fecha usando UTC para evitar
-      problemas de cambio de día por zona horaria.
-    */
-    const fecha = new Date(`${date}T12:00:00Z`);
+
+    // -------------------------------------------------
+    // CREAR FECHA EN UTC
+    // -------------------------------------------------
+
+    const fecha = new Date(
+      date + "T12:00:00Z"
+    );
+
 
     if (Number.isNaN(fecha.getTime())) {
       return json(400, {
@@ -154,65 +202,105 @@ exports.handler = async (event) => {
       });
     }
 
+
+    // -------------------------------------------------
+    // DÍA DE LA SEMANA
+    // -------------------------------------------------
+
     const diaSemana = fecha.getUTCDay();
 
     const horarios =
       SCHEDULE[diaSemana] || [];
 
-    // Si ese día no trabaja
+
+    // -------------------------------------------------
+    // DÍA SIN CONSULTA
+    // -------------------------------------------------
+
     if (horarios.length === 0) {
       return json(200, {
         ok: true,
-        date,
+        date: date,
         slots: []
       });
     }
 
-    /*
-      Consultar las citas existentes en Supabase
-      para esa fecha.
-    */
+
+    // -------------------------------------------------
+    // CONSULTAR CITAS EN SUPABASE
+    // -------------------------------------------------
+
+    const supabaseUrl =
+      SUPABASE_URL.replace(/\/$/, "");
 
     const url =
-      `${SUPABASE_URL}/rest/v1/appointments` +
-      `?date=eq.${encodeURIComponent(date)}` +
-      `&select=time,status`;
+      supabaseUrl +
+      "/rest/v1/appointments" +
+      "?date=eq." +
+      encodeURIComponent(date) +
+      "&select=time,status";
+
+
+    console.log(
+      "Consultando Supabase:",
+      url
+    );
+
 
     const respuesta = await fetch(url, {
       method: "GET",
 
       headers: {
         "apikey": SUPABASE_SERVICE_ROLE_KEY,
+
         "Authorization":
-          `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`
+          "Bearer " +
+          SUPABASE_SERVICE_ROLE_KEY,
+
+        "Content-Type":
+          "application/json"
       }
     });
 
-    const texto = await respuesta.text();
+
+    // -------------------------------------------------
+    // LEER RESPUESTA
+    // -------------------------------------------------
+
+    const texto =
+      await respuesta.text();
+
 
     if (!respuesta.ok) {
 
       console.error(
-        "Error de Supabase:",
+        "Supabase respondió con error:",
         respuesta.status,
         texto
       );
 
       return json(500, {
         ok: false,
-        error:
-          "No se pudieron consultar las citas."
+        error: "No se pudieron consultar las citas.",
+        supabase_status: respuesta.status
       });
     }
 
-    let citas = [];
+
+    // -------------------------------------------------
+    // CONVERTIR JSON
+    // -------------------------------------------------
+
+    let citas;
 
     try {
+
       citas = JSON.parse(texto);
+
     } catch (error) {
 
       console.error(
-        "Respuesta inesperada de Supabase:",
+        "Respuesta inválida de Supabase:",
         texto
       );
 
@@ -223,56 +311,94 @@ exports.handler = async (event) => {
       });
     }
 
-    /*
-      Guardamos las horas ocupadas.
-    */
 
-    const ocupadas = new Set(
-      Array.isArray(citas)
-        ? citas
-            .filter(cita => {
-              return (
-                cita.status !== "cancelled" &&
-                cita.status !== "cancelada"
-              );
-            })
-            .map(cita => {
-              return String(cita.time).slice(0, 5);
-            })
-        : []
-    );
+    // -------------------------------------------------
+    // ASEGURAR ARRAY
+    // -------------------------------------------------
 
-    /*
-      Construimos los horarios.
-    */
+    if (!Array.isArray(citas)) {
+      citas = [];
+    }
 
-    const slots = horarios.map(time => ({
-      time,
-      available: !ocupadas.has(time)
-    }));
+
+    // -------------------------------------------------
+    // HORAS OCUPADAS
+    // -------------------------------------------------
+
+    const ocupadas =
+      new Set();
+
+
+    for (const cita of citas) {
+
+      // Citas canceladas NO bloquean horario
+
+      if (
+        cita.status === "cancelled" ||
+        cita.status === "cancelada"
+      ) {
+        continue;
+      }
+
+
+      if (cita.time) {
+
+        const hora =
+          String(cita.time).slice(0, 5);
+
+        ocupadas.add(hora);
+      }
+    }
+
+
+    // -------------------------------------------------
+    // CONSTRUIR SLOTS
+    // -------------------------------------------------
+
+    const slots =
+      horarios.map(function (time) {
+
+        return {
+          time: time,
+
+          available:
+            !ocupadas.has(time)
+        };
+
+      });
+
+
+    // -------------------------------------------------
+    // RESPUESTA FINAL
+    // -------------------------------------------------
 
     return json(200, {
       ok: true,
-      date,
-      slots
+      date: date,
+      slots: slots
     });
 
-} catch (error) {
 
-  console.error("ERROR COMPLETO AVAILABILITY:", error);
+  } catch (error) {
 
-  return json(500, {
-    ok: false,
-    error: error.message || "Error interno del servidor.",
-    name: error.name || null,
-    cause: error.cause
-      ? {
-          name: error.cause.name || null,
-          message: error.cause.message || null,
-          code: error.cause.code || null,
-          errno: error.cause.errno || null,
-          hostname: error.cause.hostname || null
-        }
-      : null
-  });
-}
+    // -------------------------------------------------
+    // ERROR GENERAL
+    // -------------------------------------------------
+
+    console.error(
+      "Error en availability.js:",
+      error
+    );
+
+
+    return json(500, {
+      ok: false,
+
+      error:
+        error &&
+        error.message
+          ? error.message
+          : "Error interno del servidor."
+    });
+  }
+};
